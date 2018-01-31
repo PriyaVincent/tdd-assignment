@@ -16,6 +16,12 @@
 
 package org.tektutor.data.jpa.service;
 
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,13 +29,8 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
 import org.tektutor.data.jpa.SampleDataRestApplication;
-import org.tektutor.data.jpa.domain.City;
-
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import org.tektutor.data.jpa.model.City;
 
 /**
  * Integration tests for {@link CityRepository}.
@@ -42,6 +43,32 @@ public class CityRepositoryIntegrationTests {
 
 	@Autowired
 	CityRepository repository;
+	
+	@Before
+	public void setup() throws Exception {
+		for(int i=0; i<20; i++){
+			City city = new City();
+			city.setCityName("Test"+i);
+			repository.save(city);
+		}	
+	}
+
+	@Test
+	public void addCity() {
+		City city = new City();
+		city.setCityName("Chennai");
+		City response = this.repository.save(city);
+		assertTrue(response.getCityId() != null);
+	}
+
+	@Test
+	public void findCityByName() {
+		City city = new City();
+		city.setCityName("Chennai");
+		this.repository.save(city);
+		City response = this.repository.findByName("Chennai");
+		assertTrue(response.getCityName().equals("Chennai"));
+	}
 
 	@Test
 	public void findsFirstPageOfCities() {
